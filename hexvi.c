@@ -27,7 +27,7 @@ char *outputfilename = NULL;
 
 line l;
 
-int writeToOutputFile();
+int writeToOutputFile(char *line_iterator);
 void initOutputFile();
 
 int main(int argc, char *argv[]){
@@ -99,7 +99,8 @@ int main(int argc, char *argv[]){
                 printf("\\n"); //prevent newline characters from being printed, thereby the output format doesn't get messed up
             }else { printf("%c", isgraph(currentchar) ? currentchar : '.');}
         }
-        writeToOutputFile();
+        line_iterator = l.linecontent;
+        writeToOutputFile(line_iterator);
         memset(l.linecontent, 0, linelength);
         printf("\n");
     }while(read_counter < amounttoread);
@@ -115,16 +116,16 @@ int main(int argc, char *argv[]){
     return 0;
 }
 
-int writeToOutputFile() {
-
-    char currentchar;
+int writeToOutputFile(char *line_iterator) {
+    char currentchar, *temp_line_iterator;
+    temp_line_iterator = line_iterator;
     for(int i = 0; i <= lastreadbytes; i++) {
-        fprintf(outputfile, "%04hhx ", *(++line_iterator));
+        fprintf(outputfile, "%04hhx ", *(++temp_line_iterator));
     }
-    line_iterator = line_iterator;
     fprintf(outputfile, "   ");
+    temp_line_iterator = line_iterator;
     for(int i = 0; i <= lastreadbytes; i++) {
-        currentchar = *(++line_iterator);
+        currentchar = *(++temp_line_iterator);
         if(currentchar == 10){
             fprintf(outputfile, "\\n");
         }else { fprintf(outputfile, "%c", isgraph(currentchar) ? currentchar : '.');}
