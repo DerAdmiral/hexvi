@@ -77,6 +77,7 @@ int main(int argc, char *argv[]){
     //printf("Passed argmunets:\nSourcefile: %p\nOutputfile %p\nMemory for line content: %p\nAmount of bytes to read %d\nLinelengtg %d\n", sourcefile, outputfile, l.linecontent, amounttoread, linelength);
     if(!sourcefile) {
         fprintf(stderr, "Please privide a source file with '-f <path to sourcefile>'");
+        exit(EXIT_FAILURE);
     }
     if(outputfile) initOutputFile(amounttoread);
     do{
