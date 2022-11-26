@@ -23,6 +23,7 @@ char *line_iterator;
 FILE *sourcefile = NULL;
 char *sourcefilename = NULL;
 FILE *outputfile = NULL;
+char *outputfilename = NULL;
 
 line l;
 
@@ -53,7 +54,7 @@ int main(int argc, char *argv[]){
                     }
                     fflush(stdin);
                 }
-                initOutputFile(optarg);
+                outputfilename = strdup(optarg);
                 break;
             }
             case 'n':{
@@ -64,20 +65,22 @@ int main(int argc, char *argv[]){
                 linelength = atoi(optarg);
                 break;
             }
-            case '?':
-                break;
             default:{
                 break;
             }
         }
     }
-    if(!(l.linecontent = (char *) calloc(linelength, sizeof(char)))) {
+    if(!(l.linecontent = (char *) calloc(linelength, sizeof(char)))) { //Request memory to store the bytes read from the file to store in 
         printf("Failed to allocate memory");
         exit(EXIT_FAILURE);
     }
     //printf("Passed argmunets:\nSourcefile: %p\nOutputfile %p\nMemory for line content: %p\nAmount of bytes to read %d\nLinelengtg %d\n", sourcefile, outputfile, l.linecontent, amounttoread, linelength);
-    line_iterator = l.linecontent;
+    if(!sourcefile) {
+        fprintf(stderr, "Please privide a source file with '-f <path to sourcefile>'");
+    }
+    if(outputfile) initOutputFile(amounttoread);
     do{
+        line_iterator = l.linecontent; // setting line_iterator to the address of linecontent, thus there is always a pointer pointing to the beginning of the memory block
         for(int i = 0; i < linelength; i++) {
             fread(++line_iterator, 1, 1, sourcefile);
             ++read_counter;
@@ -93,18 +96,19 @@ int main(int argc, char *argv[]){
         for (int i = 0; i <= lastreadbytes; i++) {
             currentchar = *(++line_iterator);
             if(currentchar == 10){
-                printf("\\n");
+                printf("\\n"); //prevent newline characters from being printed, thereby the output format doesn't get messed up
             }else { printf("%c", isgraph(currentchar) ? currentchar : '.');}
         }
-        line_iterator = l.linecontent;
         writeToOutputFile();
         memset(l.linecontent, 0, linelength);
-        printf("\n", read_counter);
+        printf("\n");
     }while(read_counter < amounttoread);
 
     printf("\n");
 
     free(l.linecontent);
+    free(sourcefilename);
+    free(outputfilename);
     fclose(sourcefile);
     fclose(outputfile);
 
@@ -113,14 +117,14 @@ int main(int argc, char *argv[]){
 
 int writeToOutputFile() {
 
-    char *temp_line_iterator = line_iterator, currentchar;
+    char currentchar;
     for(int i = 0; i <= lastreadbytes; i++) {
-        fprintf(outputfile, "%04hhx ", *(++temp_line_iterator));
+        fprintf(outputfile, "%04hhx ", *(++line_iterator));
     }
-    temp_line_iterator = line_iterator;
+    line_iterator = line_iterator;
     fprintf(outputfile, "   ");
     for(int i = 0; i <= lastreadbytes; i++) {
-        currentchar = *(++temp_line_iterator);
+        currentchar = *(++line_iterator);
         if(currentchar == 10){
             fprintf(outputfile, "\\n");
         }else { fprintf(outputfile, "%c", isgraph(currentchar) ? currentchar : '.');}
@@ -129,9 +133,8 @@ int writeToOutputFile() {
     return 0;
 }
 
-void initOutputFile(char *filename){
+void initOutputFile(int bytestoread){
     printf("Init file\n");
     time_t time_of_beginning = time(NULL);
-    fprintf(outputfile, "%s\n\nSourcefile: %s\nOutputfile: %s\nTime: %s\n", __FILE__, sourcefilename, filename, ctime(&time_of_beginning));
-    free(sourcefilename);
+    fprintf(outputfile, "%s\n\nSourcefile: %s\nOutputfile: %s[%d]\nTime: %s\n", __FILE__, sourcefilename, outputfilename, bytestoread, ctime(&time_of_beginning));
 }
