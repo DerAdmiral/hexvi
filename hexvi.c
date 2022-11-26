@@ -33,7 +33,7 @@ void initOutputFile();
 int main(int argc, char *argv[]){
     int opt, errorinput = 110; //110 = ascii: 'n' 
     char currentchar;
-    while((opt = getopt(argc, argv, "f:o:n:l:")) != -1){
+    while((opt = getopt(argc, argv, "f:o:n:l:h")) != -1){
         switch(opt) {
             case 'f':{
                 if(!(sourcefile = fopen(optarg, "r"))){
@@ -65,6 +65,11 @@ int main(int argc, char *argv[]){
                 linelength = atoi(optarg);
                 break;
             }
+            case 'h':
+                printf("Usage: -f sourcefile [-o outputfile] [-l linelength] [-n bytes to read]\n\n");
+                printf("    -f path to a file to read bytes from\n    -o path to the outputfile\n");
+                printf("    -l amount of characters to print in a line\n    -n amount of bytes to read from sourcefile\n\n");
+                exit(EXIT_SUCCESS);
             default:{
                 break;
             }
@@ -101,7 +106,7 @@ int main(int argc, char *argv[]){
             }else { printf("%c", isgraph(currentchar) ? currentchar : '.');}
         }
         line_iterator = l.linecontent;
-        writeToOutputFile(line_iterator);
+        if(outputfile) writeToOutputFile(line_iterator);
         memset(l.linecontent, 0, linelength);
         printf("\n");
     }while(read_counter < amounttoread);
@@ -112,7 +117,7 @@ int main(int argc, char *argv[]){
     free(sourcefilename);
     free(outputfilename);
     fclose(sourcefile);
-    fclose(outputfile);
+    if(outputfile) fclose(outputfile);
 
     return 0;
 }
