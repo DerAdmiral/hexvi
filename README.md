@@ -1,9 +1,9 @@
 # About hexvi
 
-hexvi is a simple heviewer to inspect files written in C.  
+hexvi is a simple heviewer to inspect files 
 Compatibility:  
 -Linux  
--macos (haven't had the opportunity to test it)
+-maybe macos (haven't had the opportunity to test it)
 
 
 ## Usage
